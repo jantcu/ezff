@@ -18,11 +18,22 @@ A minimal Go wrapper for FFmpeg to simplify common video trimming tasks via the 
 
 ## Installation
 
+1. Download the binary from [Releases](https://github.com/jantcu/ezff/releases)
+2. Move the binary to a directory in your PATH (e.g., `/usr/local/bin`)
+
+<details>
+<summary>Or build from source</summary>
+
+1. Clone the repository: `git clone git@github.com:jantcu/ezff.git`
+2. Run `go install` if your set up supports modules (see [Go docs](https://go.dev/doc/install) for details)
+
+Or
+
 1. Clone the repository: `git clone git@github.com:jantcu/ezff.git`
 2. Build the binary: `cd ezff && go build`
 3. Move the binary to a directory in your PATH (e.g., `/usr/local/bin`): `sudo mv ezff /usr/local/bin/`
 
-Or instead of step 3, use `go install` if you structure it as a module (see [Go docs](https://go.dev/doc/install) for details).
+</details>
 
 ## Usage
 
