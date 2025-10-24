@@ -59,7 +59,8 @@ func usage() {
 Commands:
   trim-start <input> <seconds> [--output <output>]
   trim-end <input> <seconds> [--output <output>]
-  trim-mid <input> <start_cut> <end_cut> [--output <output>]`)
+  trim-mid <input> <start_cut> <end_cut> [--output <output>]
+  trim <input> <trim_start> <trim_end> [--output <output>]`)
 	os.Exit(1)
 }
 
@@ -150,6 +151,42 @@ func main() {
 		vf := fmt.Sprintf("select='not(between(t,%f,%f))',setpts=N/FRAME_RATE/TB", start, end)
 		af := fmt.Sprintf("aselect='not(between(t,%f,%f))',asetpts=N/SR/TB", start, end)
 		cmdArgs := []string{"-i", input, "-vf", vf, "-af", af, output}
+		runCmd("ffmpeg", cmdArgs)
+	case "trim":
+		if len(args) < 5 {
+			fmt.Fprintln(os.Stderr, "Usage: ezff trim <input> <trim_start> <trim_end> [--output <output>]")
+			os.Exit(1)
+		}
+		input := args[2]
+		trimStart, err := strconv.ParseFloat(args[3], 64)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "Invalid trim_start")
+			os.Exit(1)
+		}
+		trimEnd, err := strconv.ParseFloat(args[4], 64)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "Invalid trim_end")
+			os.Exit(1)
+		}
+		dur, err := getDuration(input)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "Error getting duration:", err)
+			os.Exit(1)
+		}
+		totalTrim := trimStart + trimEnd
+		if dur <= totalTrim {
+			fmt.Fprintln(os.Stderr, "Duration too short for trimming")
+			os.Exit(1)
+		}
+		t := dur - totalTrim
+		output := ""
+		if len(args) > 6 && args[5] == "--output" {
+			output = args[6]
+		}
+		if output == "" {
+			output = generateOutput(input, "_trim")
+		}
+		cmdArgs := []string{"-ss", fmt.Sprintf("%f", trimStart), "-i", input, "-t", fmt.Sprintf("%f", t), "-c", "copy", output}
 		runCmd("ffmpeg", cmdArgs)
 	default:
 		usage()
